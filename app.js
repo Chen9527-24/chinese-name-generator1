@@ -1,5 +1,5 @@
 // 配置参数
-const API_URL = 'http://43.139.242.141/api/generate';
+const API_URL = 'https://43.139.242.141/api/generate';
 let API_KEY = '';
 
 // 检查是否已保存API密钥
@@ -102,6 +102,11 @@ function saveToHistory(content, firstNameTitle) {
     renderHistory();
 }
 
+// 添加调试函数
+function debugLog(message, data) {
+    console.log(`[DEBUG] ${message}:`, data);
+}
+
 async function generateNames() {
     try {
         const englishName = document.getElementById('englishName').value;
@@ -110,47 +115,40 @@ async function generateNames() {
             return;
         }
 
+        debugLog('开始请求', { url: API_URL, name: englishName });
+        
         // 显示加载动画
         document.getElementById('loading').style.display = 'block';
-        document.getElementById('results').style.display = 'none';
+        document.getElementById('result').style.display = 'none';
 
-        const response = await fetch(API_URL, {
+        const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({
-                model: "Pro/deepseek-ai/DeepSeek-R1",
-                messages: [{
-                    role: "user",
-                    content: `请根据英文名${englishName}生成三个优雅且有中国文化内涵的中文名。要求：
-1. 每个名字包含中文、拼音
-2. 分别用中英文解释名字的寓意
-3. 体现中国传统文化元素
-4. 理解英文名字的含义，然后生成中文名字，并且有幽默成分，适当可以加一些梗
-格式范例：
-1. 林书豪 (Lín Shūháo)
-"林"含义：...
-"书"含义：...
-"豪"含义：...
-   中文解释：...
-   English: ...`
-                }],
-                temperature: 0.7,
-                max_tokens: 1000
-            })
-        });
+            mode: 'cors',
+            body: JSON.stringify({ englishName })
+        };
+
+        debugLog('请求配置', requestOptions);
+
+        const response = await fetch(API_URL, requestOptions);
+        debugLog('收到响应', { status: response.status, statusText: response.statusText });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            debugLog('错误响应内容', errorText);
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
 
         const data = await response.json();
+        debugLog('解析后的数据', data);
+        
         displayResults(data);
     } catch (error) {
-        console.error('Error:', error);
-        alert('生成失败，请稍后重试: ' + error.message);
+        console.error('错误详情:', error);
+        alert('生成失败，请查看控制台获取详细错误信息');
     } finally {
         // 隐藏加载动画
         document.getElementById('loading').style.display = 'none';
