@@ -118,8 +118,10 @@ async function generateNames() {
         debugLog('开始请求', { url: API_URL, name: englishName });
         
         // 显示加载动画
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('result').style.display = 'none';
+        const loadingEl = document.getElementById('loading');
+        const resultEl = document.getElementById('result');
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (resultEl) resultEl.style.display = 'none';
 
         const requestOptions = {
             method: 'POST',
@@ -151,15 +153,36 @@ async function generateNames() {
         alert('生成失败，请查看控制台获取详细错误信息');
     } finally {
         // 隐藏加载动画
-        document.getElementById('loading').style.display = 'none';
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) loadingEl.style.display = 'none';
     }
 }
 
-function displayResults(content) {
-    const resultsDiv = document.getElementById('results');
-    const resultsContent = resultsDiv.querySelector('.results-content');
-    
-    // 解析内容
+function displayResults(data) {
+    try {
+        const resultsDiv = document.getElementById('results');
+        if (!resultsDiv) {
+            console.error('找不到结果显示区域');
+            return;
+        }
+
+        // 如果是直接从 AI API 返回的数据
+        if (data.choices && data.choices[0]) {
+            const content = data.choices[0].message.content;
+            const names = parseNames(content);
+            displayParsedResults(names);
+        } else {
+            // 如果是我们的服务器处理过的数据
+            resultsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            resultsDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('显示结果时出错:', error);
+        alert('显示结果时出错，请查看控制台获取详细信息');
+    }
+}
+
+function parseNames(content) {
     const lines = content.split('\n');
     let currentName = '';
     let currentDetails = [];
@@ -205,7 +228,10 @@ function displayResults(content) {
         });
     }
 
-    // 生成HTML
+    return names;
+}
+
+function displayParsedResults(names) {
     const resultsHTML = names.map(item => `
         <div class="name-result">
             <div class="name-title">${item.name}</div>
@@ -223,12 +249,12 @@ function displayResults(content) {
         </div>
     `).join('');
 
-    // 显示结果
-    resultsContent.innerHTML = resultsHTML;
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = resultsHTML;
     resultsDiv.style.display = 'block';
     
     // 保存到历史记录
     if (names.length > 0) {
-        saveToHistory(content, names[0].name);
+        saveToHistory(names[0].name, names[0].name);
     }
 }
