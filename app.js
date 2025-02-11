@@ -103,16 +103,17 @@ function saveToHistory(content, firstNameTitle) {
 }
 
 async function generateNames() {
-    const englishName = document.getElementById('englishName').value.trim();
-    if (!englishName) {
-        alert('请输入英文名');
-        return;
-    }
-
-    // 显示加载状态
-    document.getElementById('loading').classList.remove('hidden');
-
     try {
+        const englishName = document.getElementById('englishName').value;
+        if (!englishName) {
+            alert('请输入英文名');
+            return;
+        }
+
+        // 显示加载动画
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('results').style.display = 'none';
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -141,23 +142,18 @@ async function generateNames() {
             })
         });
 
-        const data = await response.json();
         if (!response.ok) {
-            throw new Error(data.error?.message || '请求失败');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        if (data.choices && data.choices[0]) {
-            const content = data.choices[0].message.content;
-            displayResults(content);
-        } else {
-            throw new Error('未获取到有效响应');
-        }
+        const data = await response.json();
+        displayResults(data);
     } catch (error) {
         console.error('Error:', error);
-        alert('生成失败：' + error.message);
+        alert('生成失败，请稍后重试: ' + error.message);
     } finally {
-        // 隐藏加载状态
-        document.getElementById('loading').classList.add('hidden');
+        // 隐藏加载动画
+        document.getElementById('loading').style.display = 'none';
     }
 }
 
@@ -231,7 +227,7 @@ function displayResults(content) {
 
     // 显示结果
     resultsContent.innerHTML = resultsHTML;
-    resultsDiv.classList.remove('hidden');
+    resultsDiv.style.display = 'block';
     
     // 保存到历史记录
     if (names.length > 0) {
