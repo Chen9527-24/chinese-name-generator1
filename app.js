@@ -1,5 +1,5 @@
 // 配置参数
-const API_URL = 'https://43.139.242.141/api/generate';
+const API_URL = 'http://43.139.242.141/api/generate';
 let API_KEY = '';
 
 // 检查是否已保存API密钥
