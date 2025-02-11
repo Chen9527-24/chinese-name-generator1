@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文名字生成器 - Chinese Name Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Your Chinese Name Generator <small>中文名生成器</small></h1>
+        <div class="input-group">
+            <input type="text" id="englishName" placeholder="Enter your English name 请输入英文名">
+            <button onclick="generateNames()">Generate 立即生成</button>
+        </div>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Generating meaningful names... 正在生成富有文化内涵的名字...</p>
+        </div>
+
+        <div id="results" class="hidden">
+            <div class="name-card">
+                <h3>✨ Your Culturally Rich Names <span class="subtitle">为您精心生成的名字</span></h3>
+                <div class="results-content"></div>
+            </div>
+        </div>
+
+        <!-- 历史记录按钮 -->
+        <button id="historyBtn" class="history-btn">历史记录</button>
+
+        <!-- 历史记录侧边栏 -->
+        <div id="historySidebar" class="history-sidebar">
+            <div class="history-header">
+                <h3>历史记录</h3>
+                <button id="closeHistory" class="close-btn">✕</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
